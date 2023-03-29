@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Create a simple html page showcasing pdf and other digital books, given a directory
+# of books
+# by Emad Pourhassani emad@emadp.xyz
+
+
+# Generate Book Covers using the convert command
+GenerateCovers () {
+    PWD=$(pwd)
+
+	if ! [ -d ./covers ]; then
+			mkdir covers
+			echo "Create covers directory."
+	fi
+	
+  echo "-------- GENERATING PDF COVERS --------"
+  # GET PDF COVERS
+  find $1 -name "*.pdf" -print0 | while IFS= read -r -d '' book;
+    do
+        bookname=$(basename "$book")
+        echo "generating cover for $bookname"
+        convert -scale '1000x1000+0+0>' -colorspace rgb -strip "$book"\[\0\] -alpha remove -alpha off "$PWD"/covers/"${bookname%.pdf}"-cover.png
+    done
+
+  echo "-------- GENERATING EPUB COVERS --------"
+  # GET EPUB COVERS
+  find $1 -name "*.epub" -print0 | while IFS= read -r -d '' book;
+    do
+        bookname=$(basename "$book")
+        echo "generating cover for $bookname"
+        epub-thumbnailer "$book" "$PWD"/covers/"${bookname%.epub}"-cover.png 1000 &>/dev/null
+    done
+
+
+}
+
+case $1 in
+        gc|generatecovers) GenerateCovers "$2";; # Generate covers for books in given directory 
+
+        *)      printf "USAGE: spxb OPTION dir\n"
+                printf "OPTIONS:\n"
+                printf "\tspxb gc . => creates covers from books present in the directorty\n"
+                printf "\tspxb supports pdfs and epub files for now.\n";;
+esac
+exit $?
