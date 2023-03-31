@@ -5,14 +5,16 @@
 # by Emad Pourhassani emad@emadp.xyz
 
 
+COVERS=covers # COVERS DIRECTORY
+TEMPLATE=template.html # TEMPLATE FILE
+
 # Generate Book Covers using the convert command
 GenerateCovers () {
   PWD=$(pwd) # Current directory
-
   # Check if covers directory exists, if not create it.
-	if ! [ -d ./covers ]; then
-			mkdir covers
-			echo "Create covers directory."
+	if ! [ -d $COVERS ]; then
+			mkdir -p $COVERS
+			echo "Created covers directory."
 	fi
 	
   # GET PDF COVERS
@@ -21,7 +23,7 @@ GenerateCovers () {
     do
         bookname=$(basename "$book")
         echo "generating cover for $bookname"
-        convert -scale '1000x1000+0+0>' -colorspace rgb -strip "$book"\[\0\] -alpha remove -alpha off "$PWD"/covers/"${bookname%.pdf}"-cover.png
+        convert -scale '1000x1000+0+0>' -colorspace rgb -strip "$book"\[\0\] -alpha remove -alpha off "$PWD"/$COVERS/"${bookname%.pdf}"-cover.png
     done
 
   # GET EPUB COVERS
@@ -30,7 +32,7 @@ GenerateCovers () {
     do
         bookname=$(basename "$book")
         echo "generating cover for $bookname"
-        epub-thumbnailer "$book" "$PWD"/covers/"${bookname%.epub}"-cover.png 1000 &>/dev/null
+        epub-thumbnailer "$book" "$PWD"/$COVERS/"${bookname%.epub}"-cover.png 1000 &>/dev/null
     done
     
 
@@ -40,34 +42,34 @@ GenerateCovers () {
 # Create the html page utilizing the template
 GeneratePage () {
   # Check if template exists, if not throw an error and exit.
-	if ! [ -f template.html ]; then
-			echo "template.html doesn't exist."
+	if ! [ -f "$TEMPLATE" ]; then
+			echo ""$TEMPLATE" doesn't exist."
 			echo "create a working one or download the default one at https://github.com/xemadp/spxb "
 			echo "refer to the README.md for more info."
       exit $?
 	fi
    
   # GET TEMPLATE FOR INDIVIDUAL BOOK ENTRY
-  CONTENT=$(sed -n '/\%CONTENT\ BEGIN\%/,/\%CONTENT\ END\%/{/\%CONTENT BEGIN\%/b;/\%CONTENT END\%/b;p}' template.html)
+  CONTENT=$(sed -n '/\%CONTENT\ BEGIN\%/,/\%CONTENT\ END\%/{/\%CONTENT BEGIN\%/b;/\%CONTENT END\%/b;p}' "$TEMPLATE")
   
   # GENERATE bibliotheca.html
-  cat template.html | sed "/\%CONTENT END\%$/q" > bibliotheca.html
+  cat "$TEMPLATE" | sed "/\%CONTENT END\%$/q" > bibliotheca.html
 
     # GENERATE PDF LIST
   find $1 -mindepth 1 -maxdepth 1 -name "*.pdf" -print0 | while IFS= read -r -d '' book;
   do
     bookname="$(basename "$book")"
-   echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/covers\/${bookname%.pdf}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.pdf}/g" >> bibliotheca.html
+   echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/$COVERS\/${bookname%.pdf}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.pdf}/g" >> bibliotheca.html
   done
 
   # GENERATE EPUB LIST
   find $1 -mindepth 1 -maxdepth 1 -name "*.epub" -print0 | while IFS= read -r -d '' book;
   do
     bookname="$(basename "$book")"
-    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/covers\/${bookname%.epub}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.epub}/g" >> bibliotheca.html
+    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/$COVERS\/${bookname%.epub}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.epub}/g" >> bibliotheca.html
   done
   
-  tac template.html | sed "/\%CONTENT END\%$/q" | sed "$ d" >> bibliotheca.html
+  tac "$TEMPLATE" | sed "/\%CONTENT END\%$/q" | sed "$ d" >> bibliotheca.html
 
   sed -i "/\%CONTENT BEGIN\%/,/\%CONTENT END\%/d" bibliotheca.html
 
