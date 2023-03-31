@@ -32,6 +32,7 @@ GenerateCovers () {
         echo "generating cover for $bookname"
         epub-thumbnailer "$book" "$PWD"/covers/"${bookname%.epub}"-cover.png 1000 &>/dev/null
     done
+    
 
 
 }
@@ -57,7 +58,6 @@ GeneratePage () {
   do
     bookname="$(basename "$book")"
    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/covers\/${bookname%.pdf}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.pdf}/g" >> bibliotheca.html
-   echo " " >> bibliotheca.html
   done
 
   # GENERATE EPUB LIST
@@ -65,7 +65,6 @@ GeneratePage () {
   do
     bookname="$(basename "$book")"
     echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/covers\/${bookname%.epub}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.epub}/g" >> bibliotheca.html
-   echo " " >> bibliotheca.html
   done
   
   tac template.html | sed "/\%CONTENT END\%$/q" | sed "$ d" >> bibliotheca.html
@@ -78,11 +77,11 @@ case $1 in
         gp|generatepage) GeneratePage "$2";; # Generates the bibliotheca.html file for books in given directory
         b|build) GenerateCovers "$2"; GeneratePage "$2";; # Generates covers and the bibliotheca.html file for books in given directory
 
-        *)      printf "USAGE: spxb OPTION dir\n"
+        *)      printf "USAGE: spxb OPTION DIR\n"
                 printf "OPTIONS:\n"
-                printf "\tspxb gc DIR => creates covers from books present in the directorty\n"
-                printf "\tspxb gp DIR => creates bibliotheca.html from books present in the directorty\n"
-                printf "\tspxb b DIR => creates covers and bibliotheca.html from books present in the directorty\n"
+                printf "\tspxb gc DIR => creates covers from books present in the DIR directorty\n"
+                printf "\tspxb gp DIR => creates bibliotheca.html from books present in the DIR directorty\n"
+                printf "\tspxb b DIR => creates covers and bibliotheca.html from books present in the DIR directorty\n"
                 printf "\tspxb supports pdfs and epub files for now.\n";;
 esac
 exit $?
