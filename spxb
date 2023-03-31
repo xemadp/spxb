@@ -7,25 +7,26 @@
 
 # Generate Book Covers using the convert command
 GenerateCovers () {
-    PWD=$(pwd)
+  PWD=$(pwd) # Current directory
 
+  # Check if covers directory exists, if not create it.
 	if ! [ -d ./covers ]; then
 			mkdir covers
 			echo "Create covers directory."
 	fi
 	
-  echo "-------- GENERATING PDF COVERS --------"
   # GET PDF COVERS
-  find $1 -name "*.pdf" -print0 | while IFS= read -r -d '' book;
+  echo "-------- GENERATING PDF COVERS --------"
+  find $1 -mindepth 1 -maxdepth 1 -name "*.pdf" -print0 | while IFS= read -r -d '' book;
     do
         bookname=$(basename "$book")
         echo "generating cover for $bookname"
         convert -scale '1000x1000+0+0>' -colorspace rgb -strip "$book"\[\0\] -alpha remove -alpha off "$PWD"/covers/"${bookname%.pdf}"-cover.png
     done
 
-  echo "-------- GENERATING EPUB COVERS --------"
   # GET EPUB COVERS
-  find $1 -name "*.epub" -print0 | while IFS= read -r -d '' book;
+  echo "-------- GENERATING EPUB COVERS --------"
+  find $1 -mindepth 1 -maxdepth 1 -name "*.epub" -print0 | while IFS= read -r -d '' book;
     do
         bookname=$(basename "$book")
         echo "generating cover for $bookname"
@@ -35,12 +36,53 @@ GenerateCovers () {
 
 }
 
+# Create the html page utilizing the template
+GeneratePage () {
+  # Check if template exists, if not throw an error and exit.
+	if ! [ -f template.html ]; then
+			echo "template.html doesn't exist."
+			echo "create a working one or download the default one at https://github.com/xemadp/spxb "
+			echo "refer to the README.md for more info."
+      exit $?
+	fi
+   
+  # GET TEMPLATE FOR INDIVIDUAL BOOK ENTRY
+  CONTENT=$(sed -n '/\%CONTENT\ BEGIN\%/,/\%CONTENT\ END\%/{/\%CONTENT BEGIN\%/b;/\%CONTENT END\%/b;p}' template.html)
+  
+  # GENERATE bibliotheca.html
+  cat template.html | sed "/\%CONTENT END\%$/q" > bibliotheca.html
+
+    # GENERATE PDF LIST
+  find $1 -mindepth 1 -maxdepth 1 -name "*.pdf" -print0 | while IFS= read -r -d '' book;
+  do
+    bookname="$(basename "$book")"
+   echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/covers\/${bookname%.pdf}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.pdf}/g" >> bibliotheca.html
+   echo " " >> bibliotheca.html
+  done
+
+  # GENERATE EPUB LIST
+  find $1 -mindepth 1 -maxdepth 1 -name "*.epub" -print0 | while IFS= read -r -d '' book;
+  do
+    bookname="$(basename "$book")"
+    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/covers\/${bookname%.epub}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.epub}/g" >> bibliotheca.html
+   echo " " >> bibliotheca.html
+  done
+  
+  tac template.html | sed "/\%CONTENT END\%$/q" | sed "$ d" >> bibliotheca.html
+
+  sed -i "/\%CONTENT BEGIN\%/,/\%CONTENT END\%/d" bibliotheca.html
+
+}
 case $1 in
         gc|generatecovers) GenerateCovers "$2";; # Generate covers for books in given directory 
+        gp|generatepage) GeneratePage "$2";; # Generates the bibliotheca.html file for books in given directory
+        b|build) GenerateCovers "$2"; GeneratePage "$2";; # Generates covers and the bibliotheca.html file for books in given directory
 
         *)      printf "USAGE: spxb OPTION dir\n"
                 printf "OPTIONS:\n"
-                printf "\tspxb gc . => creates covers from books present in the directorty\n"
+                printf "\tspxb gc DIR => creates covers from books present in the directorty\n"
+                printf "\tspxb gp DIR => creates bibliotheca.html from books present in the directorty\n"
+                printf "\tspxb b DIR => creates covers and bibliotheca.html from books present in the directorty\n"
                 printf "\tspxb supports pdfs and epub files for now.\n";;
 esac
 exit $?

@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title> SIMPLEX BIBLIOTHECA </title>
+<style>
+    body{
+        margin:1em auto;
+        max-width:50em;
+        padding:0 .62em;
+        font: sans-serif
+    }
+    blockquote, pre, code {
+        background-color: #f0f0f0;
+        border-color: #222;
+    }
+    h1,h2,h3 {
+        line-height:1.2;
+    }
+        .vertical {
+            width: 30em auto;
+            border: 2px solid gray;
+            padding: 50px;
+            margin: auto;
+        }
+
+    @media print{
+        body{
+            max-width:none
+        }
+    }
+    @media (prefers-color-scheme: dark){
+        body {color:#fff;background:#111}
+        a:link {color:#cdf}
+        a:hover, a:visited:hover {color:#def}
+        a:visited {color:#dcf}
+        blockquote, pre, code {
+                background-color: #2f2f2f;
+        }
+    }
+</style>
+
+<body>
+<h1 style='text-align:center'>SIMPLEX BIBLIOTHECA</h1>
+<div class="vertical">
+    <table>
+        %CONTENT BEGIN%
+    <tr>
+        <td><img src="%COVER%" alt="%BOOKNAME%" width="100"></td>
+        <td><a href="%BOOKDIR%"> %BOOKNAME%</a></td>
+    </tr>
+    <tr>
+        <td><hr></td>
+        <td><hr></td>
+    </tr>
+        %CONTENT END%
+</table>
+<div>
+        
+</body>
+</head>
+</html>
