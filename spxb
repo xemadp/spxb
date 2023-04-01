@@ -82,9 +82,9 @@ case $1 in
 
         *)      printf "USAGE: spxb OPTION DIR\n"
                 printf "OPTIONS:\n"
-                printf "\tspxb gc DIR => creates covers from books present in the DIR directorty\n"
-                printf "\tspxb gp DIR => creates "$BIBLIOTHECA" from books present in the DIR directorty\n"
-                printf "\tspxb b DIR => creates covers and "$BIBLIOTHECA" from books present in the DIR directorty\n"
+                printf "\tspxb gc DIR => generates covers from books present in the DIR directorty\n"
+                printf "\tspxb gp DIR => generates "$BIBLIOTHECA" from books present in the DIR directorty\n"
+                printf "\tspxb b DIR => generates covers and "$BIBLIOTHECA" from books present in the DIR directorty\n"
                 printf "\tspxb supports pdfs and epub files for now.\n";;
 esac
 exit $?

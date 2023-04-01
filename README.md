@@ -28,8 +28,8 @@ This pretty much explains it:
 ```
 USAGE: spxb OPTION DIR
 OPTIONS:
-        spxb gc DIR => creates covers from books present in the DIR directorty
-        spxb gp DIR => creates bibliotheca.html from books present in the DIR directorty
+        spxb gc DIR => generates covers from books present in the DIR directorty
+        spxb gp DIR => generates bibliotheca.html from books present in the DIR directorty
         spxb b DIR => creates covers and bibliotheca.html from books present in the DIR directorty
         spxb supports pdfs and epub files for now.
 ```
