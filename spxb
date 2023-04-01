@@ -56,18 +56,11 @@ GeneratePage () {
   # GENERATE "$BIBLIOTHECA"
   cat "$TEMPLATE" | sed "/\%CONTENT END\%$/q" > "$BIBLIOTHECA"
 
-    # GENERATE PDF LIST
-  find $1 -mindepth 1 -maxdepth 1 -name "*.pdf" | sort -k1 | while read -r book;
+    # GENERATE BOOK LIST
+  find $1 -mindepth 1 -maxdepth 1 -name "*.pdf" -o -name "*.epub" | sort -k1 | while read -r book;
   do
     bookname="$(basename "$book")"
-    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s|\%COVER\%|$COVERS\/${bookname%.pdf}-cover.png|" -e "s/\%BOOKNAME\%/${bookname%.pdf}/g" >> "$BIBLIOTHECA"
-  done
-
-  # GENERATE EPUB LIST
-  find $1 -mindepth 1 -maxdepth 1 -name "*.epub" | sort -k1 | while read -r book;
-  do
-    bookname="$(basename "$book")"
-    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s|\%COVER\%|$COVERS\/${bookname%.epub}-cover.png|" -e "s/\%BOOKNAME\%/${bookname%.epub}/g" >> "$BIBLIOTHECA"
+    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s|\%COVER\%|$COVERS\/${bookname%.*}-cover.png|" -e "s/\%BOOKNAME\%/${bookname%.*}/g" >> "$BIBLIOTHECA"
   done
   
   tac "$TEMPLATE" | sed "/\%CONTENT END\%$/q" | sed "$ d" | tac >> "$BIBLIOTHECA"
