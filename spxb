@@ -7,6 +7,7 @@
 
 COVERS=covers # COVERS DIRECTORY
 TEMPLATE=template.html # TEMPLATE FILE
+BIBLIOTHECA=bibliotheca.html # BIBLIOTHECA FILE
 
 # Generate Book Covers using the convert command
 GenerateCovers () {
@@ -52,38 +53,38 @@ GeneratePage () {
   # GET TEMPLATE FOR INDIVIDUAL BOOK ENTRY
   CONTENT=$(sed -n '/\%CONTENT\ BEGIN\%/,/\%CONTENT\ END\%/{/\%CONTENT BEGIN\%/b;/\%CONTENT END\%/b;p}' "$TEMPLATE")
   
-  # GENERATE bibliotheca.html
-  cat "$TEMPLATE" | sed "/\%CONTENT END\%$/q" > bibliotheca.html
+  # GENERATE "$BIBLIOTHECA"
+  cat "$TEMPLATE" | sed "/\%CONTENT END\%$/q" > "$BIBLIOTHECA"
 
     # GENERATE PDF LIST
-  find $1 -mindepth 1 -maxdepth 1 -name "*.pdf" -print0 | while IFS= read -r -d '' book;
+  find $1 -mindepth 1 -maxdepth 1 -name "*.pdf" | sort -k1 | while read -r book;
   do
     bookname="$(basename "$book")"
-   echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/$COVERS\/${bookname%.pdf}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.pdf}/g" >> bibliotheca.html
+    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s|\%COVER\%|$COVERS\/${bookname%.pdf}-cover.png|" -e "s/\%BOOKNAME\%/${bookname%.pdf}/g" >> "$BIBLIOTHECA"
   done
 
   # GENERATE EPUB LIST
-  find $1 -mindepth 1 -maxdepth 1 -name "*.epub" -print0 | while IFS= read -r -d '' book;
+  find $1 -mindepth 1 -maxdepth 1 -name "*.epub" | sort -k1 | while read -r book;
   do
     bookname="$(basename "$book")"
-    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s/\%COVER\%/$COVERS\/${bookname%.epub}-cover.png/" -e "s/\%BOOKNAME\%/${bookname%.epub}/g" >> bibliotheca.html
+    echo "$CONTENT" | sed -e "s|\%BOOKDIR\%|\"$book\"|" -e "s|\%COVER\%|$COVERS\/${bookname%.epub}-cover.png|" -e "s/\%BOOKNAME\%/${bookname%.epub}/g" >> "$BIBLIOTHECA"
   done
   
-  tac "$TEMPLATE" | sed "/\%CONTENT END\%$/q" | sed "$ d" >> bibliotheca.html
+  tac "$TEMPLATE" | sed "/\%CONTENT END\%$/q" | sed "$ d" | tac >> "$BIBLIOTHECA"
 
-  sed -i "/\%CONTENT BEGIN\%/,/\%CONTENT END\%/d" bibliotheca.html
+  sed -i -e "/\%CONTENT BEGIN\%/,/\%CONTENT END\%/d" "$BIBLIOTHECA"
 
 }
 case $1 in
         gc|generatecovers) GenerateCovers "$2";; # Generate covers for books in given directory 
-        gp|generatepage) GeneratePage "$2";; # Generates the bibliotheca.html file for books in given directory
-        b|build) GenerateCovers "$2"; GeneratePage "$2";; # Generates covers and the bibliotheca.html file for books in given directory
+        gp|generatepage) GeneratePage "$2";; # Generates the "$BIBLIOTHECA" file for books in given directory
+        b|build) GenerateCovers "$2"; GeneratePage "$2";; # Generates covers and the "$BIBLIOTHECA" file for books in given directory
 
         *)      printf "USAGE: spxb OPTION DIR\n"
                 printf "OPTIONS:\n"
                 printf "\tspxb gc DIR => creates covers from books present in the DIR directorty\n"
-                printf "\tspxb gp DIR => creates bibliotheca.html from books present in the DIR directorty\n"
-                printf "\tspxb b DIR => creates covers and bibliotheca.html from books present in the DIR directorty\n"
+                printf "\tspxb gp DIR => creates "$BIBLIOTHECA" from books present in the DIR directorty\n"
+                printf "\tspxb b DIR => creates covers and "$BIBLIOTHECA" from books present in the DIR directorty\n"
                 printf "\tspxb supports pdfs and epub files for now.\n";;
 esac
 exit $?
